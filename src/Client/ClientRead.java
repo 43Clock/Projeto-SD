@@ -23,19 +23,25 @@ public class ClientRead implements Runnable{
             this.in = new DataInputStream(socket.getInputStream());
             String input;
             while ((input = this.in.readUTF())!= null){ //Logout
-                System.out.println(input);
+                //System.out.println(input);
                 if(s.isWaiting())
                     s.stopWaiting();
-                if(input.equals("TRUE"))
+                if(input.equals("VALID"))
                     log.login();
                 if(input.equals("LOGOUT")) {
                     log.logout();
                 }
+                if (input.equals("REGISTERED")) {
+                    System.out.println("\nUtilizador Registado com sucesso!");
+                }
+                if (input.equals("NOTREGISTERED")) {
+                    System.out.println("\nUtilizador já registado!");
+                }
+                if (input.equals("MOVED")) {
+                    System.out.println("\nLocalização Atualizada");
+                }
                 if (input.equals("SAIR")) {
                     log.sair();
-                    /*socket.shutdownInput();
-                    socket.shutdownOutput();
-                    socket.close();*/
                     break;
                 }
             }

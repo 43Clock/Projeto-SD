@@ -19,11 +19,20 @@ public class Posicao {
         return posY;
     }
 
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Posicao posicao = (Posicao) o;
+        //System.out.println("PING");
         return posX == posicao.posX && posY == posicao.posY;
     }
 
@@ -34,5 +43,9 @@ public class Posicao {
         sb.append(",").append(posY);
         sb.append(')');
         return sb.toString();
+    }
+
+    public Posicao clone() {
+        return new Posicao(this.posX, this.posY);
     }
 }

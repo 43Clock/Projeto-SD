@@ -21,9 +21,6 @@ public class ClienteWrite implements Runnable {
     public void run() {
         try {
             this.out = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
-            BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
-
-            String input;
             while (!log.isSair()) {
                 displayMenus();
                 menu_option();
@@ -44,9 +41,23 @@ public class ClienteWrite implements Runnable {
     public void displayMenus() {
         switch (this.menu) {
             case 0:{
-                System.out.println("1 - Fazer Login");
-                System.out.println("2 - Registar");
-                System.out.println("3 - Sair");
+                System.out.println("+------------------+");
+                System.out.println("| 1 - Fazer Login  |");
+                System.out.println("| 2 - Registar     |");
+                System.out.println("| 3 - Sair         |");
+                System.out.println("+------------------+");
+                break;
+            }
+            case 1:{
+                System.out.println("-----------------");
+                System.out.println("1 - Atualizar Posição");
+                System.out.println("2 - Pessoas numa Localização");
+                System.out.println("3 - ");
+                System.out.println("4 - ");
+                System.out.println("5 - ");
+                System.out.println("6 - ");
+                System.out.println("7 - Logout");
+                System.out.println("-----------------");
                 break;
             }
         }
@@ -58,10 +69,15 @@ public class ClienteWrite implements Runnable {
                 menu_one();
                 break;
             }
+            case 1:{
+                menu_two();
+                break;
+            }
         }
     }
 
     public int lerOpcao(int max) {
+        System.out.print("Opção: ");
         int option = -1;
         String s;
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -87,7 +103,8 @@ public class ClienteWrite implements Runnable {
 
         switch (option) {
             case 1:{
-
+                opcaoLogin();
+                break;
             }
             case 2:{
                 opcaoRegistar();
@@ -98,7 +115,32 @@ public class ClienteWrite implements Runnable {
                 break;
             }
         }
+        if(this.log.isLogin()) this.menu = 1;
+        if(!this.log.isLogin() && option == 1) System.out.println("\nUtilizador ou Password errados! ");
+    }
 
+    public void menu_two() throws IOException, InterruptedException {
+        int option = lerOpcao(7);
+        switch (option) {
+            case 1:{
+                opcaoMover();
+                break;
+            }case 2:{
+                break;
+            }case 3:{
+                break;
+            }case 4:{
+                break;
+            }case 5:{
+                break;
+            }case 6:{
+                break;
+            }case 7:{
+                server_send("LOGOUT");
+                this.menu = 0;
+                break;
+            }
+        }
     }
 
     public void opcaoRegistar() { //@TODO UTILIZADOR JA EXISTE E COORDENADAS MAL
@@ -113,6 +155,34 @@ public class ClienteWrite implements Runnable {
             System.out.println("Inserir Ordenada:");
             int y = Integer.parseInt(input.readLine());
             server_send(String.join("/","REGISTAR",nome,password,Integer.toString(x),Integer.toString(y)));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.out.println("Coordenada Inválida");
+        }
+    }
+
+    public void opcaoLogin() { //@TODO CASO DE PASSWORD ERRADA
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Inserir Nome de Utilizador:");
+            String nome = input.readLine();
+            System.out.println("Inserir Palavra Passe:");
+            String password = input.readLine();
+            server_send(String.join("/","LOGIN",nome,password));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void opcaoMover() {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Inserir Coordenada:");
+            int x = Integer.parseInt(input.readLine());
+            System.out.println("Inserir Ordenada:");
+            int y = Integer.parseInt(input.readLine());
+            server_send(String.join("/","MOVER",Integer.toString(x),Integer.toString(y)));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } catch (NumberFormatException e) {

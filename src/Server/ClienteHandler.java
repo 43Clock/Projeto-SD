@@ -2,9 +2,10 @@ package Server;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ClienteHandler implements Runnable{
     private Map<String, Utilizador> users;
@@ -12,13 +13,12 @@ public class ClienteHandler implements Runnable{
     private DataInputStream in;
     private Socket socket;
     private Lock lock;
+    private String utilizador;
 
-
-
-    public ClienteHandler(Map<String, Utilizador> users, Socket socket) {
+    public ClienteHandler(Map<String, Utilizador> users, Socket socket,Lock lock) {
         this.users = users;
         this.socket = socket;
-        this.lock = new ReentrantLock();
+        this.lock = lock;
     }
 
     @Override
@@ -48,10 +48,16 @@ public class ClienteHandler implements Runnable{
 
         switch (args[0]) {
             case "REGISTAR": //@TODO Mandar mensagem caso utilizador ja exista
-                comandoRegistar(msg);
-                System.out.println(this.users);
-                out.writeUTF("Utilizador Registado");
-                out.flush();
+                if(comandoRegistar(msg)){
+                    System.out.println(this.users);
+                    out.writeUTF("REGISTERED");
+                    out.flush();
+                }
+                else{
+                    System.out.println(this.users);
+                    out.writeUTF("NOTREGISTERED");
+                    out.flush();
+                }
                 break;
             case "LOGIN":
                 comandoLogin(msg);
@@ -59,6 +65,11 @@ public class ClienteHandler implements Runnable{
             case "LOGOUT":
                 out.writeUTF("LOGOUT");
                 out.flush();
+                this.utilizador = null;
+                break;
+            case "MOVER":
+                comandoMover(msg);
+                System.out.println(this.users);
                 break;
             case "SAIR":
                 out.writeUTF("SAIR");
@@ -67,14 +78,17 @@ public class ClienteHandler implements Runnable{
         }
     }
 
-    public void comandoRegistar(String msg) {
+    public boolean comandoRegistar(String msg) {
         String[] args = msg.split("/");
-        Utilizador u = new Utilizador(args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4])); //@TODO parse Int e Utilizador DIfernete
+        Utilizador u = new Utilizador(args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
         try {
             this.lock.lock();
-            this.users.put(u.getUsername(), u);
-            this.usersNaZona(u.getPosicao());
-
+            if(!this.users.containsKey(u.getUsername())) {
+                this.users.put(u.getUsername(), u);
+                this.usersNaZona(u.getPosicao());
+                return true;
+            }
+            else return false;
         }finally {
             this.lock.unlock();
         }
@@ -92,11 +106,11 @@ public class ClienteHandler implements Runnable{
         try {
             for (Utilizador us:this.users.values()){
                 if(us.getPosicao().equals(p)){
-                    Set<Utilizador> contactos = new HashSet<>();
+                    Set<String> contactos = new HashSet<>();
                     for (Utilizador ut : this.users.values()) {
                         if (!ut.getUsername().equals(us.getUsername())) {
                             if (ut.getPosicao().equals(us.getPosicao())) {
-                                contactos.add(ut);
+                                contactos.add(ut.getUsername());
                             }
                         }
                     }
@@ -112,20 +126,43 @@ public class ClienteHandler implements Runnable{
 
     public void comandoLogin(String msg)  {
         String[] args = msg.split("/");
-        Utilizador u = this.users.get(args[1]);
         try {
+            this.lock.lock();
+            Utilizador u = this.users.get(args[1]);
             if (u == null ) {
-                out.writeUTF("FALSE");
+                out.writeUTF("NOTVALID");
                 out.flush();
             } else if (!u.getPassword().equals(args[2])) {
-                out.writeUTF("FALSE");
+                out.writeUTF("NOTVALID");
                 out.flush();
             }else {
-                out.writeUTF("TRUE");
+                out.writeUTF("VALID");
                 out.flush();
+                this.utilizador = args[1];
             }
-        }catch (IOException e){
+        }catch (IOException ignored){
+        }finally {
+            this.lock.unlock();
         }
+    }
+
+    public void comandoMover(String msg) throws IOException {
+        String[] args = msg.split("/");
+        Utilizador u = null;
+        try {
+            this.lock.lock();
+            u = this.users.get(this.utilizador);
+            u.lock();
+            u.setPosicao(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+            usersNaZona(u.getPosicao());
+        }finally {
+            assert u != null;
+            u.unlock();
+            this.lock.unlock();
+        }
+
+        out.writeUTF("MOVED");
+        out.flush();
     }
 
 }

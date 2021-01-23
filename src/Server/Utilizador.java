@@ -3,13 +3,14 @@ package Server;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class Utilizador {
     private String username;
     private String password;
     private Lock lock;
     private Posicao posicao;
-    private Map<Posicao,Set<Utilizador>> contactos;
+    private Map<Posicao,Set<String>> contactos;
     private boolean infetado;
     private boolean isolamento;
     private boolean notificado;
@@ -53,13 +54,30 @@ public class Utilizador {
         }
     }
 
-    public Map<Posicao, Set<Utilizador>> getContactos() {
+    public Map<Posicao, Set<String>> getContactos() {
         try {
             this.lock.lock();
             return contactos;
         } finally {
             this.lock.unlock();
         }
+    }
+
+    public void setPosicao(int x, int y) {
+        try {
+            this.lock.lock();
+            if(!this.temPosicao(x,y))
+                this.posicao = new Posicao(x,y);
+            else{
+                this.posicao = this.contactos.keySet().stream().filter(a -> a.getPosX() == x && a.getPosY() == y).collect(Collectors.toList()).get(0);
+            }
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
+    public boolean temPosicao(int x, int y) {
+        return this.contactos.keySet().stream().anyMatch(a -> a.getPosX() == x && a.getPosY() == y);
     }
 
     public void lock() {
@@ -70,16 +88,10 @@ public class Utilizador {
         this.lock.unlock();
     }
 
-    public void alteraContactos(Set<Utilizador> contactos) {
+    public void alteraContactos(Set<String> contactos) {
         try {
             this.lock.lock();
-            if (!this.contactos.containsKey(this.posicao)) {
-                this.contactos.put(this.posicao, contactos);
-            } else {
-                Set<Utilizador> old = this.contactos.remove(this.posicao);
-                old.addAll(contactos);
-                this.contactos.put(this.posicao,old);
-            }
+            this.contactos.put(this.posicao,contactos);
         }finally {
             this.lock.unlock();
         }
@@ -92,8 +104,10 @@ public class Utilizador {
         sb.append(", password='").append(password).append('\'');
         sb.append(", posicao=").append(posicao);
         sb.append(", contactos=").append("{");
-        for (Set<Utilizador> s : this.contactos.values()) {
-            s.forEach(a->sb.append(a.getUsername()).append(","));
+        for (Map.Entry<Posicao, Set<String>> s : this.contactos.entrySet()) {
+            sb.append(s.getKey().toString()).append("->{");
+            s.getValue().forEach(a->sb.append(a).append(","));
+            sb.append("}");
         }
         sb.append("}, infetado=").append(infetado);
         sb.append(", isolamento=").append(isolamento);
