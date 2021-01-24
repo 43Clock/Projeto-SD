@@ -16,7 +16,6 @@ public class Servidor {
         ServerSocket ss = new ServerSocket(12345);
         Map<String,Utilizador> users = new HashMap<>();
         Lock l = new ReentrantLock();
-        Lock l2 = new ReentrantLock();
         Condition c = l.newCondition();
         Condition c2 = l.newCondition();
 

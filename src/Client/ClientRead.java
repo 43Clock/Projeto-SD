@@ -101,6 +101,7 @@ public class ClientRead implements Runnable{
                         log.sair();
                         sair = false;
                     }
+                    default -> System.out.println("\n");
                 }
                 if(s.isWaiting())
                     s.stopWaiting();

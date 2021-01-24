@@ -259,17 +259,16 @@ public class ClienteHandler implements Runnable{
             this.lock.lock();
             Posicao temp = new Posicao(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
             if(!this.users.get(this.utilizador).getPosicao().equals(temp)) {
-                while (!posicaoLivre(temp)) {
-                    this.condition.await();
-                }
-                out.writeUTF(String.join("/", "VAZIO", args[1], args[2]));
+                Thread t = new Thread(new EsperaHandler(out, lock, condition, temp, users));
+                t.start();
+                out.writeUTF("");
                 out.flush();
             }
             else{
                 out.writeUTF("ALREADY");
                 out.flush();
             }
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             this.lock.unlock();

@@ -277,9 +277,7 @@ public class ClienteWrite implements Runnable {
         try {
             server_send("MAPA");
             this.menu = 2;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
