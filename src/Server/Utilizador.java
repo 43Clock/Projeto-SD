@@ -13,6 +13,7 @@ public class Utilizador {
     private Map<Posicao,Set<String>> contactos;
     private boolean infetado;
     private boolean aviso;
+    private boolean especial;
 
 
     public Utilizador(String username, String password, int x, int y) {
@@ -23,6 +24,10 @@ public class Utilizador {
         this.lock = new ReentrantLock();
         this.infetado = false;
         this.aviso = false;
+        this.especial = false;
+        if (username.toLowerCase().contains("admin")) {
+            this.especial = true;
+        }
     }
 
     public String getUsername() {
@@ -83,10 +88,20 @@ public class Utilizador {
         }
     }
 
+    public boolean isEspecial() {
+        try {
+            this.lock.lock();
+            return especial;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
     public void infetado() {
         try {
             this.lock.lock();
             this.infetado = true;
+            this.posicao = new Posicao(-100, -100); //Isolamento
         }finally {
             this.lock.unlock();
         }

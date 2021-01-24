@@ -39,6 +39,9 @@ public class ClienteWrite implements Runnable {
     }
 
     public void displayMenus() {
+        if (this.menu == 1 && log.isEspecial()) {
+            this.menu = 2;
+        }
         switch (this.menu) {
             case 0:{
                 System.out.println("\n+------------------+");
@@ -49,14 +52,24 @@ public class ClienteWrite implements Runnable {
                 break;
             }
             case 1:{
-                System.out.println("+-----------------");
-                System.out.println("| 1 - Atualizar Posição");
-                System.out.println("| 2 - Pessoas numa Localização");
-                System.out.println("| 3 - Mover quando estiver vazio");
-                System.out.println("| 4 - Anunciar infeção");
-                System.out.println("| 5 - ");
-                System.out.println("| 6 - Logout");
-                System.out.println("+-----------------");
+                System.out.println("+-----------------------------------------+");
+                System.out.println("| 1 - Atualizar Posição                   |");
+                System.out.println("| 2 - Pessoas numa Localização            |");
+                System.out.println("| 3 - Verificar se localização é segura   |");
+                System.out.println("| 4 - Anunciar infeção                    |");
+                System.out.println("| 5 - Logout                              |");
+                System.out.println("+-----------------------------------------+");
+                break;
+            }
+            case 2:{
+                System.out.println("+-----------------------------------------+");
+                System.out.println("| 1 - Atualizar Posição                   |");
+                System.out.println("| 2 - Pessoas numa Localização            |");
+                System.out.println("| 3 - Verificar se localização é segura   |");
+                System.out.println("| 4 - Anunciar infeção                    |");
+                System.out.println("| 5 - Mapa de posições                    |");
+                System.out.println("| 6 - Logout                              |");
+                System.out.println("+-----------------------------------------+");
                 break;
             }
         }
@@ -70,6 +83,10 @@ public class ClienteWrite implements Runnable {
             }
             case 1:{
                 menu_two();
+                break;
+            }
+            case 2:{
+                menu_three();
                 break;
             }
         }
@@ -118,7 +135,7 @@ public class ClienteWrite implements Runnable {
     }
 
     public void menu_two() throws IOException, InterruptedException {
-        int option = lerOpcao(7);
+        int option = lerOpcao(5);
         switch (option) {
             case 1:{
                 opcaoMover();
@@ -133,6 +150,30 @@ public class ClienteWrite implements Runnable {
                 opcaoInfetado();
                 break;
             }case 5:{
+                server_send("LOGOUT");
+                this.menu = 0;
+                break;
+            }
+        }
+    }
+
+    public void menu_three() throws IOException, InterruptedException {
+        int option = lerOpcao(6);
+        switch (option) {
+            case 1:{
+                opcaoMover();
+                break;
+            }case 2:{
+                opcaoPessoasLocalizacao();
+                break;
+            }case 3:{
+                opcaoMoverVazio();
+                break;
+            }case 4:{
+                opcaoInfetado();
+                break;
+            }case 5:{
+                opcaoMapa();
                 break;
             }case 6:{
                 server_send("LOGOUT");
@@ -142,17 +183,18 @@ public class ClienteWrite implements Runnable {
         }
     }
 
-    public void opcaoRegistar() { //@TODO UTILIZADOR JA EXISTE E COORDENADAS MAL
+    public void opcaoRegistar() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
             System.out.println("Inserir Nome de Utilizador:");
             String nome = input.readLine();
             System.out.println("Inserir Palavra Passe:");
             String password = input.readLine();
-            System.out.println("Inserir Coordenada:");
+            System.out.println("Inserir Abcissa:");
             int x = Integer.parseInt(input.readLine());
             System.out.println("Inserir Ordenada:");
             int y = Integer.parseInt(input.readLine());
+            if(y<0||x<0) throw new NumberFormatException();
             server_send(String.join("/","REGISTAR",nome,password,Integer.toString(x),Integer.toString(y)));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -161,7 +203,7 @@ public class ClienteWrite implements Runnable {
         }
     }
 
-    public void opcaoLogin() { //@TODO CASO DE PASSWORD ERRADA
+    public void opcaoLogin() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
             System.out.println("Inserir Nome de Utilizador:");
@@ -177,10 +219,11 @@ public class ClienteWrite implements Runnable {
     public void opcaoMover() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
-            System.out.println("Inserir Coordenada:");
+            System.out.println("Inserir Abcissa:");
             int x = Integer.parseInt(input.readLine());
             System.out.println("Inserir Ordenada:");
             int y = Integer.parseInt(input.readLine());
+            if(y<0||x<0) throw new NumberFormatException();
             server_send(String.join("/","MOVER",Integer.toString(x),Integer.toString(y)));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -192,10 +235,11 @@ public class ClienteWrite implements Runnable {
     public void opcaoPessoasLocalizacao() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
-            System.out.println("Inserir Coordenada:");
+            System.out.println("Inserir Abcissa:");
             int x = Integer.parseInt(input.readLine());
             System.out.println("Inserir Ordenada:");
             int y = Integer.parseInt(input.readLine());
+            if(y<0||x<0) throw new NumberFormatException();
             server_send(String.join("/","PESSOAS",Integer.toString(x),Integer.toString(y)));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -207,10 +251,11 @@ public class ClienteWrite implements Runnable {
     public void opcaoMoverVazio() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
-            System.out.println("Inserir Coordenada:");
+            System.out.println("Inserir Abcissa:");
             int x = Integer.parseInt(input.readLine());
             System.out.println("Inserir Ordenada:");
             int y = Integer.parseInt(input.readLine());
+            if(y<0||x<0) throw new NumberFormatException();
             server_send(String.join("/","VAZIO",Integer.toString(x),Integer.toString(y)));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -224,6 +269,17 @@ public class ClienteWrite implements Runnable {
             server_send("INFETADO");
             this.menu = 0;
         } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void opcaoMapa() {
+        try {
+            server_send("MAPA");
+            this.menu = 2;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

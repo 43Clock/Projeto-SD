@@ -25,7 +25,6 @@ public class CovidHandler implements Runnable {
     public void run() {
         while (true) {
             try {
-                System.out.println(this.utilizador.temAviso());
                 this.lock.lock();
                 while (!utilizador.temAviso()) {
                     this.condition.await();
@@ -33,8 +32,9 @@ public class CovidHandler implements Runnable {
                 this.utilizador.tiraAviso();
                 out.writeUTF("AVISO");
                 out.flush();
-            } catch (InterruptedException | IOException ignored) {
-
+            } catch (InterruptedException | IOException e) {
+                Thread.currentThread().interrupt();
+                break;
             } finally {
                 this.lock.unlock();
             }

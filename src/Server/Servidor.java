@@ -23,7 +23,7 @@ public class Servidor {
 
         while (true) {
             Socket socket = ss.accept();
-            Thread worker = new Thread(new ClienteHandler(users,socket,l,c));
+            Thread worker = new Thread(new ClienteHandler(users,socket,l,c,c2));
             worker.start();
         }
     }

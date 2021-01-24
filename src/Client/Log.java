@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Log {
     private boolean login;
     private boolean logout;
+    private boolean especial;
     private boolean sair;
     private Lock lock;
 
@@ -34,6 +35,15 @@ public class Log {
         }
     }
 
+    public boolean isEspecial() {
+        try {
+            this.lock.lock();
+            return especial;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
     public boolean isSair() {
         try {
             this.lock.lock();
@@ -53,11 +63,21 @@ public class Log {
         }
     }
 
+    public void especial() {
+        try {
+            this.lock.lock();
+            this.especial = true;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
     public void logout() {
         try {
             this.lock.lock();
             this.logout = true;
             this.login = false;
+            this.especial = false;
         }finally {
             this.lock.unlock();
         }

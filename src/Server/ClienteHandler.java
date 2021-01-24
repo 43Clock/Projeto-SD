@@ -2,9 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
@@ -15,14 +13,17 @@ public class ClienteHandler implements Runnable{
     private Socket socket;
     private Lock lock;
     private Condition condition;
+    private Condition conditionCovid;
     private String utilizador;
+    private Thread covid;
 
 
-    public ClienteHandler(Map<String, Utilizador> users, Socket socket,Lock lock,Condition c) {
+    public ClienteHandler(Map<String, Utilizador> users, Socket socket,Lock lock,Condition c,Condition c2) {
         this.users = users;
         this.socket = socket;
         this.lock = lock;
         this.condition = c;
+        this.conditionCovid = c2;
     }
 
     @Override
@@ -51,23 +52,14 @@ public class ClienteHandler implements Runnable{
         String[] args = msg.split("/");
 
         switch (args[0]) {
-            case "REGISTAR": //@TODO Mandar mensagem caso utilizador ja exista
-                if(comandoRegistar(msg)){
-                    out.writeUTF("REGISTERED");
-                    out.flush();
-                }
-                else{
-                    out.writeUTF("NOTREGISTERED");
-                    out.flush();
-                }
+            case "REGISTAR":
+                comandoRegistar(msg);
                 break;
             case "LOGIN":
                 comandoLogin(msg);
                 break;
             case "LOGOUT":
-                out.writeUTF("LOGOUT");
-                out.flush();
-                this.utilizador = null;
+                comandoLogout(msg);
                 break;
             case "MOVER":
                 comandoMover(msg);
@@ -81,6 +73,9 @@ public class ClienteHandler implements Runnable{
             case "INFETADO":
                 comandoInfecao(msg);
                 break;
+            case "MAPA":
+                comandoMapa(msg);
+                break;
             case "SAIR":
                 out.writeUTF("SAIR");
                 out.flush();
@@ -88,18 +83,35 @@ public class ClienteHandler implements Runnable{
         }
     }
 
-    public boolean comandoRegistar(String msg) {
+    public void comandoLogout(String msg) throws IOException {
+        try {
+            this.lock.lock();
+            out.writeUTF("LOGOUT");
+            out.flush();
+            this.utilizador = null;
+            this.covid.interrupt();
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
+    public void comandoRegistar(String msg) {
         String[] args = msg.split("/");
         Utilizador u = new Utilizador(args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
         try {
             this.lock.lock();
-            if(!this.users.containsKey(u.getUsername())) {
+            if (!this.users.containsKey(u.getUsername())) {
                 this.users.put(u.getUsername(), u);
                 this.usersNaZona(u.getPosicao());
-                return true;
+                out.writeUTF("REGISTERED");
+            } else {
+                out.writeUTF("NOTREGISTERED");
             }
-            else return false;
-        }finally {
+            out.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             this.lock.unlock();
         }
     }
@@ -153,7 +165,13 @@ public class ClienteHandler implements Runnable{
                     }
                     else {
                         this.utilizador = args[1];
-                        out.writeUTF("VALID");
+                        this.covid = new Thread(new CovidHandler(this.out, this.lock, this.conditionCovid, this.users.get(this.utilizador)));
+                        this.covid.start();
+                        if (!u.isEspecial()) {
+                            out.writeUTF("VALID");
+                        } else {
+                            out.writeUTF("VALIDESPECIAL");
+                        }
                         out.flush();
                     }
                 }
@@ -167,7 +185,7 @@ public class ClienteHandler implements Runnable{
 
     public void comandoMover(String msg) throws IOException {
         String[] args = msg.split("/");
-        Utilizador u = null;
+        Utilizador u;
         Posicao old;
         try {
             this.lock.lock();
@@ -188,9 +206,8 @@ public class ClienteHandler implements Runnable{
                 out.writeUTF("ALREADY");
                 out.flush();
             }
-        }finally {
-            assert u != null;
             u.unlock();
+        }finally {
             this.lock.unlock();
         }
 
@@ -226,8 +243,8 @@ public class ClienteHandler implements Runnable{
             for (Utilizador u : this.users.values()) {
                 if (u.getPosicao().getPosX() == Integer.parseInt(args[1]) && u.getPosicao().getPosY() == Integer.parseInt(args[2])) {
                     sum++;
-                    u.unlock();
                 }
+                u.unlock();
             }
             out.writeUTF(String.join("/","PESSOAS",Integer.toString(sum),args[1],args[2]));
             out.flush();
@@ -263,21 +280,97 @@ public class ClienteHandler implements Runnable{
         try {
             this.lock.lock();
             this.users.get(this.utilizador).infetado();
-            /*for (Utilizador u : this.users.values()) {
+            for (Utilizador u : this.users.values()) {
                 u.lock();
             }
             for (Set<String> s : this.users.get(this.utilizador).getContactos().values()) {
                 s.forEach(a->this.users.get(a).avisa());
             }
-            this.condition.signalAll();*/
+            this.conditionCovid.signalAll();
             out.writeUTF("INFETADO");
             out.flush();
         }finally {
-            /*for (Utilizador u : this.users.values()) {
+            for (Utilizador u : this.users.values()) {
                 u.unlock();
-            }*/
+            }
             this.lock.unlock();
         }
     }
 
+    public void comandoMapa(String msg) {
+        try {
+            this.lock.lock();
+            int x = 0, y = 0;
+            for(Utilizador u:this.users.values()){ //Dimensao do mapa
+                for (Posicao p : u.getContactos().keySet()) {
+                    x = Math.max(p.getPosX(),x);
+                    y = Math.max(p.getPosY(),y);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("MAPA/").append(x).append("/").append(y);
+            for (int i = 0; i <=x; i++) {
+                for (int j = 0; j <=y; j++) {
+                    sb.append("/").append(usersNaPosicao(i, j)).append("-").append(userInfetadosPosicao(i,j));
+                }
+            }
+            String s = sb.toString();
+            out.writeUTF(s);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
+    public int usersNaPosicao(int x, int y) {
+        try {
+            int r = 0;
+            this.lock.lock();
+            for (Utilizador u : this.users.values()) {
+                u.lock();
+            }
+            for (Utilizador u : this.users.values()) {
+                for (Posicao p : u.getContactos().keySet()) {
+                    if (p.getPosX() == x && p.getPosY() == y) {
+                        r++;
+                        break;
+                    }
+                }
+            }
+            return r;
+        } finally {
+            for (Utilizador u : this.users.values()) {
+                u.unlock();
+            }
+            this.lock.unlock();
+        }
+    }
+
+    public int userInfetadosPosicao(int x,int y) {
+        try {
+            int r = 0;
+            this.lock.lock();
+            for (Utilizador u : this.users.values()) {
+                u.lock();
+            }
+            for (Utilizador u : this.users.values()) {
+                if(u.isInfetado()){
+                    for (Posicao p : u.getContactos().keySet()) {
+                        if (p.getPosX() == x && p.getPosY() == y) {
+                            r++;
+                            break;
+                        }
+                    }
+                }
+            }
+            return r;
+        } finally {
+            for (Utilizador u : this.users.values()) {
+                u.unlock();
+            }
+            this.lock.unlock();
+        }
+    }
 }

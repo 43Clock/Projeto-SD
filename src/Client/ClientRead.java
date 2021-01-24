@@ -3,7 +3,9 @@ package Client;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.locks.Lock;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ClientRead implements Runnable{
     private Socket socket;
@@ -17,50 +19,88 @@ public class ClientRead implements Runnable{
         this.s = s;
     }
 
+    public void mapa(String msg) {
+        String[] args = msg.split("/");
+        int x = Integer.parseInt(args[1]);
+        int y = Integer.parseInt(args[2]);
+        List<String> linhas = new ArrayList<>();
+        List<String> colunas = new ArrayList<>();
+        List<List<String>> dados = new ArrayList<>();
+        for (int i = 0; i <= x; i++) {
+            linhas.add(Integer.toString(i));
+        }
+        for (int i = 0; i <= y; i++) {
+            colunas.add(Integer.toString(i));
+        }
+        String[] posicoes = new String[args.length-3];
+        System.arraycopy(args, 3, posicoes, 0, args.length - 3);
+        for (int i = 0; i <=x*(y+1); i+=y+1) {
+            List<String> temp = new ArrayList<>();
+            for (int j = i,h = 0; h <=y; j++,h++) {
+                temp.add(posicoes[j]);
+            }
+            dados.add(temp);
+        }
+        Tabela t = new Tabela(linhas, colunas, dados);
+        System.out.println("--- Mapa de posições ---");
+        System.out.println(t.toString());
+    }
+
     @Override
-    public void run() { //@TODO MUDAR PARA SWITCH
+    public void run() {
         try {
             this.in = new DataInputStream(socket.getInputStream());
             String input;
-            while ((input = this.in.readUTF())!= null){ //Logout
-                String args[] = input.split("/");
-                if(input.equals("VALID")) {
-                    log.login();
-                }
-                if (input.equals("NOTVALID")) {
-                    System.out.println("\nUtilizador ou Password errados! ");
-                }
-                if(input.equals("LOGOUT")) {
-                    log.logout();
-                }
-                if (input.equals("REGISTERED")) {
-                    System.out.println("\nUtilizador Registado com sucesso!");
-                }
-                if (input.equals("NOTREGISTERED")) {
-                    System.out.println("\nUtilizador já registado!");
-                }
-                if (input.equals("MOVED")) {
-                    System.out.println("\nLocalização Atualizada");
-                }
-                if(args[0].equals("PESSOAS")){
-                    System.out.println("\nExistem "+args[1]+" pessoas na localização ("+args[2]+","+args[3]+")");
-                }
-                if (args[0].equals("VAZIO")) {
-                    System.out.println("\nA posição ("+args[1]+","+args[2]+") encontra-se agora vazia.");
-                }
-                if (input.equals("ALREADY")) {
-                    System.out.println("\nJá se encontra nessa posição");
-                }
-                if (input.equals("INFETADO")) {
-                    System.out.println("\nInteração com o servidor bloqueada porque se encontra infetado");
-                    log.logout();
-                }
-                if (input.equals("AVISO")) {
-                    System.out.println("\nEsteve em contacto com um Infetado, não seja como as machas");
-                }
-                if (input.equals("SAIR")) {
-                    log.sair();
-                    break;
+            boolean sair = true;
+            while (sair){ //Logout
+                input = this.in.readUTF();
+                String[] args = input.split("/");
+                switch (args[0]) {
+                    case "VALID" -> {
+                        log.login();
+                    }
+                    case "VALIDESPECIAL" -> {
+                        log.login();
+                        log.especial();
+                    }
+                    case "NOTVALID" -> {
+                        System.out.println("\nUtilizador ou Password errados! ");
+                    }
+                    case "LOGOUT" -> {
+                        log.logout();
+                    }
+                    case "REGISTERED" -> {
+                        System.out.println("\nUtilizador Registado com sucesso!");
+                    }
+                    case "NOTREGISTERED" -> {
+                        System.out.println("\nUtilizador já registado!");
+                    }
+                    case "MOVED" -> {
+                        System.out.println("\nLocalização Atualizada");
+                    }
+                    case "PESSOAS" -> {
+                        System.out.println("\nExistem " + args[1] + " pessoas na localização (" + args[2] + "," + args[3] + ")");
+                    }
+                    case "VAZIO" -> {
+                        System.out.println("\nA posição (" + args[1] + "," + args[2] + ") encontra-se agora vazia.");
+                    }
+                    case "ALREADY" -> {
+                        System.out.println("\nJá se encontra nessa posição");
+                    }
+                    case "INFETADO" -> {
+                        System.out.println("\nInteração com o servidor bloqueada porque se encontra infetado");
+                        log.logout();
+                    }
+                    case "AVISO" -> {
+                        System.out.println("\nEsteve em contacto com um Infetado, não saia de casa!");
+                    }
+                    case "MAPA" -> {
+                        mapa(input);
+                    }
+                    case "SAIR" -> {
+                        log.sair();
+                        sair = false;
+                    }
                 }
                 if(s.isWaiting())
                     s.stopWaiting();

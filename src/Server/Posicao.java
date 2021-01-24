@@ -32,7 +32,6 @@ public class Posicao {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Posicao posicao = (Posicao) o;
-        //System.out.println("PING");
         return posX == posicao.posX && posY == posicao.posY;
     }
 
