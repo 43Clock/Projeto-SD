@@ -28,7 +28,7 @@ public class ClienteWrite implements Runnable {
             socket.close();
 
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("Closing...");
         }
     }
 
@@ -41,7 +41,7 @@ public class ClienteWrite implements Runnable {
     public void displayMenus() {
         switch (this.menu) {
             case 0:{
-                System.out.println("+------------------+");
+                System.out.println("\n+------------------+");
                 System.out.println("| 1 - Fazer Login  |");
                 System.out.println("| 2 - Registar     |");
                 System.out.println("| 3 - Sair         |");
@@ -49,15 +49,14 @@ public class ClienteWrite implements Runnable {
                 break;
             }
             case 1:{
-                System.out.println("-----------------");
-                System.out.println("1 - Atualizar Posição");
-                System.out.println("2 - Pessoas numa Localização");
-                System.out.println("3 - ");
-                System.out.println("4 - ");
-                System.out.println("5 - ");
-                System.out.println("6 - ");
-                System.out.println("7 - Logout");
-                System.out.println("-----------------");
+                System.out.println("+-----------------");
+                System.out.println("| 1 - Atualizar Posição");
+                System.out.println("| 2 - Pessoas numa Localização");
+                System.out.println("| 3 - Mover quando estiver vazio");
+                System.out.println("| 4 - Anunciar infeção");
+                System.out.println("| 5 - ");
+                System.out.println("| 6 - Logout");
+                System.out.println("+-----------------");
                 break;
             }
         }
@@ -116,7 +115,6 @@ public class ClienteWrite implements Runnable {
             }
         }
         if(this.log.isLogin()) this.menu = 1;
-        if(!this.log.isLogin() && option == 1) System.out.println("\nUtilizador ou Password errados! ");
     }
 
     public void menu_two() throws IOException, InterruptedException {
@@ -126,16 +124,17 @@ public class ClienteWrite implements Runnable {
                 opcaoMover();
                 break;
             }case 2:{
+                opcaoPessoasLocalizacao();
                 break;
             }case 3:{
+                opcaoMoverVazio();
                 break;
             }case 4:{
+                opcaoInfetado();
                 break;
             }case 5:{
                 break;
             }case 6:{
-                break;
-            }case 7:{
                 server_send("LOGOUT");
                 this.menu = 0;
                 break;
@@ -190,6 +189,44 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    public void opcaoPessoasLocalizacao() {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Inserir Coordenada:");
+            int x = Integer.parseInt(input.readLine());
+            System.out.println("Inserir Ordenada:");
+            int y = Integer.parseInt(input.readLine());
+            server_send(String.join("/","PESSOAS",Integer.toString(x),Integer.toString(y)));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.out.println("Coordenada Inválida");
+        }
+    }
+
+    public void opcaoMoverVazio() {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Inserir Coordenada:");
+            int x = Integer.parseInt(input.readLine());
+            System.out.println("Inserir Ordenada:");
+            int y = Integer.parseInt(input.readLine());
+            server_send(String.join("/","VAZIO",Integer.toString(x),Integer.toString(y)));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.out.println("Coordenada Inválida");
+        }
+    }
+
+    public void opcaoInfetado() {
+        try {
+            server_send("INFETADO");
+            this.menu = 0;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

@@ -12,8 +12,7 @@ public class Utilizador {
     private Posicao posicao;
     private Map<Posicao,Set<String>> contactos;
     private boolean infetado;
-    private boolean isolamento;
-    private boolean notificado;
+    private boolean aviso;
 
 
     public Utilizador(String username, String password, int x, int y) {
@@ -23,8 +22,7 @@ public class Utilizador {
         this.contactos = new HashMap<>();
         this.lock = new ReentrantLock();
         this.infetado = false;
-        this.notificado = false;
-        this.isolamento = false;
+        this.aviso = false;
     }
 
     public String getUsername() {
@@ -76,8 +74,31 @@ public class Utilizador {
         }
     }
 
+    public boolean isInfetado() {
+        try {
+            this.lock.lock();
+            return infetado;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
+    public void infetado() {
+        try {
+            this.lock.lock();
+            this.infetado = true;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
     public boolean temPosicao(int x, int y) {
-        return this.contactos.keySet().stream().anyMatch(a -> a.getPosX() == x && a.getPosY() == y);
+        try {
+            this.lock.lock();
+            return this.contactos.keySet().stream().anyMatch(a -> a.getPosX() == x && a.getPosY() == y);
+        }finally {
+            this.lock.unlock();
+        }
     }
 
     public void lock() {
@@ -87,6 +108,34 @@ public class Utilizador {
     public void unlock() {
         this.lock.unlock();
     }
+
+    public void avisa() {
+        try {
+            this.lock.lock();
+            this.aviso = true;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
+    public void tiraAviso() {
+        try {
+            this.lock.lock();
+            this.aviso = false;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
+    public boolean temAviso() {
+        try {
+            this.lock.lock();
+            return this.aviso;
+        }finally {
+            this.lock.unlock();
+        }
+    }
+
 
     public void alteraContactos(Set<String> contactos) {
         try {
@@ -110,8 +159,7 @@ public class Utilizador {
             sb.append("}");
         }
         sb.append("}, infetado=").append(infetado);
-        sb.append(", isolamento=").append(isolamento);
-        sb.append(", notificado=").append(notificado);
+        sb.append(", aviso=").append(aviso);
         sb.append("}\n");
         return sb.toString();
     }

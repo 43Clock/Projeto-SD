@@ -18,16 +18,18 @@ public class ClientRead implements Runnable{
     }
 
     @Override
-    public void run() {
+    public void run() { //@TODO MUDAR PARA SWITCH
         try {
             this.in = new DataInputStream(socket.getInputStream());
             String input;
             while ((input = this.in.readUTF())!= null){ //Logout
-                //System.out.println(input);
-                if(s.isWaiting())
-                    s.stopWaiting();
-                if(input.equals("VALID"))
+                String args[] = input.split("/");
+                if(input.equals("VALID")) {
                     log.login();
+                }
+                if (input.equals("NOTVALID")) {
+                    System.out.println("\nUtilizador ou Password errados! ");
+                }
                 if(input.equals("LOGOUT")) {
                     log.logout();
                 }
@@ -40,13 +42,31 @@ public class ClientRead implements Runnable{
                 if (input.equals("MOVED")) {
                     System.out.println("\nLocalização Atualizada");
                 }
+                if(args[0].equals("PESSOAS")){
+                    System.out.println("\nExistem "+args[1]+" pessoas na localização ("+args[2]+","+args[3]+")");
+                }
+                if (args[0].equals("VAZIO")) {
+                    System.out.println("\nA posição ("+args[1]+","+args[2]+") encontra-se agora vazia.");
+                }
+                if (input.equals("ALREADY")) {
+                    System.out.println("\nJá se encontra nessa posição");
+                }
+                if (input.equals("INFETADO")) {
+                    System.out.println("\nInteração com o servidor bloqueada porque se encontra infetado");
+                    log.logout();
+                }
+                if (input.equals("AVISO")) {
+                    System.out.println("\nEsteve em contacto com um Infetado, não seja como as machas");
+                }
                 if (input.equals("SAIR")) {
                     log.sair();
                     break;
                 }
+                if(s.isWaiting())
+                    s.stopWaiting();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
+
         }
     }
 }
