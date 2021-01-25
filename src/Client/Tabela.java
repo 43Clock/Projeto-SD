@@ -2,9 +2,6 @@ package Client;
 
 import java.util.List;
 
-/**
- * Classe que permite apresentar o mapa num formato de tabela
- */
 public class Tabela {
     private final List<String> linhaDesc;
     private final List<String> colunasDesc;

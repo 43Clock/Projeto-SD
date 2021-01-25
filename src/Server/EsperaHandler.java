@@ -6,9 +6,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-/**
- * Classe que é responsável por notificar um utilizador quando uma certa posição está vazia
- */
 public class EsperaHandler implements Runnable {
     private DataOutputStream out;
     private Lock lock;
@@ -25,11 +22,7 @@ public class EsperaHandler implements Runnable {
         this.pos = p;
     }
 
-    /**
-     * Método utilizador para verificar se uma certa posição se encontra utilizadores
-     * @param posicao Posição a verificar
-     * @return True caso esta livre, False caso contrário
-     */
+
     public boolean posicaoLivre(Posicao posicao) {
         boolean res = true;
         try {
@@ -49,9 +42,6 @@ public class EsperaHandler implements Runnable {
         }
     }
 
-    /**
-     * Método run que é executado pela Thread
-     */
     @Override
     public void run() {
         try {
