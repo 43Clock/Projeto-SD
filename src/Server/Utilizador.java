@@ -30,6 +30,10 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Getter do Username
+     * @return Username
+     */
     public String getUsername() {
         try {
             this.lock.lock();
@@ -39,6 +43,10 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Getter da Password
+     * @return Password
+     */
     public String getPassword() {
         try {
             this.lock.lock();
@@ -48,6 +56,10 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Getter da Posicao
+     * @return Posicao
+     */
     public Posicao getPosicao() {
         try {
             this.lock.lock();
@@ -57,6 +69,10 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Getter do Map de contactos do utilizador
+     * @return Map de contactos
+     */
     public Map<Posicao, Set<String>> getContactos() {
         try {
             this.lock.lock();
@@ -66,6 +82,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que altera a posicão atual de um utilizador
+     */
     public void setPosicao(int x, int y) {
         try {
             this.lock.lock();
@@ -79,6 +98,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que indica se user está ou não infetado
+     */
     public boolean isInfetado() {
         try {
             this.lock.lock();
@@ -88,6 +110,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que indica se user é ou não especial
+     */
     public boolean isEspecial() {
         try {
             this.lock.lock();
@@ -97,6 +122,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que altera o estado de infeção e coloca utilizador fora do mapa
+     */
     public void infetado() {
         try {
             this.lock.lock();
@@ -107,6 +135,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que indica se existe uma posicao na lista de contactos
+     */
     public boolean temPosicao(int x, int y) {
         try {
             this.lock.lock();
@@ -116,14 +147,23 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que faz lock do Utilizador
+     */
     public void lock() {
         this.lock.lock();
     }
 
+    /**
+     * Método que faz unlock do Utilizador
+     */
     public void unlock() {
         this.lock.unlock();
     }
 
+    /**
+     * Método que para fazer o aviso de infeção
+     */
     public void avisa() {
         try {
             this.lock.lock();
@@ -133,6 +173,9 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Método que retira aviso de infeção
+     */
     public void tiraAviso() {
         try {
             this.lock.lock();
@@ -142,6 +185,10 @@ public class Utilizador {
         }
     }
 
+    /**
+     * Getter do estado do aviso
+     * @return
+     */
     public boolean temAviso() {
         try {
             this.lock.lock();
@@ -151,7 +198,10 @@ public class Utilizador {
         }
     }
 
-
+    /**
+     * Método que adiciona contactos com outros utilizadores ao historico
+     * @param contactos
+     */
     public void alteraContactos(Set<String> contactos) {
         try {
             this.lock.lock();

@@ -18,6 +18,9 @@ public class ClienteWrite implements Runnable {
         this.s = s;
     }
 
+    /**
+     * Método run que é executado pela Thread
+     */
     public void run() {
         try {
             this.out = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
@@ -32,12 +35,21 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método que emite um pedido ao servidor e espera por uma resposta
+     * @param s Pedido que vai ser enviado ao servidor
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void server_send(String s) throws IOException, InterruptedException {
         this.out.writeUTF(s);
         this.out.flush();
         this.s.setWaiting();
     }
 
+    /**
+     * Método usado para apresentar os menus
+     */
     public void displayMenus() {
         if (this.menu == 1 && log.isEspecial()) {
             this.menu = 2;
@@ -75,6 +87,11 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método para ler a decisão do cliente em cada menu
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void menu_option() throws IOException, InterruptedException {
         switch (this.menu) {
             case 0:{
@@ -92,6 +109,11 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método que lê um inteiro digitado pelo utilizador.
+     * @param max Numero máximo que o input pode ter.
+    * @return Inteiro lido
+     */
     public int lerOpcao(int max) {
         System.out.print("Opção: ");
         int option = -1;
@@ -114,6 +136,11 @@ public class ClienteWrite implements Runnable {
         return option;
     }
 
+    /**
+     * Menu inicial que apresenta as opções de fazer login, registar e sair do programa
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void menu_one() throws IOException, InterruptedException {
         int option = lerOpcao(3);
 
@@ -134,6 +161,11 @@ public class ClienteWrite implements Runnable {
         if(this.log.isLogin()) this.menu = 1;
     }
 
+    /**
+     * Menu que apresenta as diferentes opções do menu 2, para os users normais
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void menu_two() throws IOException, InterruptedException {
         int option = lerOpcao(5);
         switch (option) {
@@ -157,6 +189,11 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Menu que apresenta as diferentes opções do menu 3, para os users com acessos especiais
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void menu_three() throws IOException, InterruptedException {
         int option = lerOpcao(6);
         switch (option) {
@@ -183,6 +220,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor do registo de um utilizador
+     */
     public void opcaoRegistar() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -203,6 +243,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor para fazer o login de um utilizador
+     */
     public void opcaoLogin() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -216,6 +259,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor de alterar a posição de um utilizador
+     */
     public void opcaoMover() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -232,6 +278,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor do numero de pessoas que estão numa certa localização
+     */
     public void opcaoPessoasLocalizacao() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -248,6 +297,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor para saber quando uma certa localização está livre.
+     */
     public void opcaoMoverVazio() {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -264,6 +316,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pela informação ao servidor que o utilizador está infetado
+     */
     public void opcaoInfetado() {
         try {
             server_send("INFETADO");
@@ -273,6 +328,9 @@ public class ClienteWrite implements Runnable {
         }
     }
 
+    /**
+     * Método responsável pelo pedido ao servidor do mapa de localização, usado apenas por um utilizador com acessos especiais.
+     */
     public void opcaoMapa() {
         try {
             server_send("MAPA");
