@@ -112,7 +112,7 @@ public class ClienteWrite implements Runnable {
     /**
      * Método que lê um inteiro digitado pelo utilizador.
      * @param max Numero máximo que o input pode ter.
-    * @return Inteiro lido
+     * @return Inteiro lido
      */
     public int lerOpcao(int max) {
         System.out.print("Opção: ");

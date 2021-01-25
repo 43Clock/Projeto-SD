@@ -20,6 +20,7 @@ public class CovidHandler implements Runnable {
         this.condition = condition;
         this.utilizador = utilizador;
     }
+
     /**
      * Método run que é executado pela Thread.
      */

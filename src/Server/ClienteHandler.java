@@ -141,13 +141,16 @@ public class ClienteHandler implements Runnable{
     public void usersNaZona(Posicao p) {
         try {
             this.lock.lock();
+            Collection<Utilizador> users = new ArrayList<>();
             for (Utilizador ut : this.users.values()) {
+                users.add(ut);
                 ut.lock();
             }
-            for (Utilizador us:this.users.values()){
+            this.lock.unlock();
+            for (Utilizador us: users){
                 if(us.getPosicao().equals(p)){
                     Set<String> contactos = new HashSet<>();
-                    for (Utilizador ut : this.users.values()) {
+                    for (Utilizador ut : users) {
                         if (!ut.getUsername().equals(us.getUsername())) {
                             if (ut.getPosicao().equals(us.getPosicao())) {
                                 contactos.add(ut.getUsername());
@@ -161,7 +164,6 @@ public class ClienteHandler implements Runnable{
             for (Utilizador ut : this.users.values()) {
                 ut.unlock();
             }
-            this.lock.unlock();
         }
     }
 
@@ -252,37 +254,40 @@ public class ClienteHandler implements Runnable{
     public boolean posicaoLivre(Posicao posicao) {
         boolean res = true;
         try {
+            Collection<Utilizador> users = new ArrayList<>();
             this.lock.lock();
             for (Utilizador u : this.users.values()) {
+                users.add(u);
                 u.lock();
             }
-            for (Utilizador u : this.users.values()) {
+            this.lock.unlock();
+            for (Utilizador u : users) {
                 if (u.getPosicao().equals(posicao)) {
                     res = false;
                 }
                 u.unlock();
             }
-            return res;
-        }finally {
-            this.lock.unlock();
-        }
+        }catch(Exception ignored) {}
+        return res;
     }
-
 
     /**
      * Método responsavel por informar o utilizador de quantas pessoas estão numa certa localização
      * @param msg Pedido recebido
      * @throws IOException
      */
-    public void comandoPessoasLocalizacao(String msg) throws IOException {
+    public void comandoPessoasLocalizacao(String msg) {
         String[] args = msg.split("/");
         int sum = 0;
         try {
+            Collection<Utilizador> users = new ArrayList<>();
             this.lock.lock();
             for (Utilizador u : this.users.values()) {
+                users.add(u);
                 u.lock();
             }
-            for (Utilizador u : this.users.values()) {
+            this.lock.unlock();
+            for (Utilizador u : users) {
                 if (u.getPosicao().getPosX() == Integer.parseInt(args[1]) && u.getPosicao().getPosY() == Integer.parseInt(args[2])) {
                     sum++;
                 }
@@ -290,11 +295,8 @@ public class ClienteHandler implements Runnable{
             }
             out.writeUTF(String.join("/","PESSOAS",Integer.toString(sum),args[1],args[2]));
             out.flush();
-        }finally {
-            this.lock.unlock();
-        }
+        }catch (IOException ignored){}
     }
-
 
     /**
      * Método responsavel por notificar um utilizador se uma dada posição está vazia.
@@ -339,6 +341,7 @@ public class ClienteHandler implements Runnable{
                 s.forEach(a->this.users.get(a).avisa());
             }
             this.conditionCovid.signalAll();
+            this.covid.interrupt();
             out.writeUTF("INFETADO");
             out.flush();
         }finally {
@@ -360,11 +363,12 @@ public class ClienteHandler implements Runnable{
             for (Utilizador u : this.users.values()) {
                 u.lock();
             }
-            for(Utilizador u:this.users.values()){ //Dimensao do mapa
+            for(Utilizador u : this.users.values()){ //Dimensao do mapa
                 for (Posicao p : u.getContactos().keySet()) {
                     x = Math.max(p.getPosX(),x);
                     y = Math.max(p.getPosY(),y);
                 }
+                u.unlock();
             }
             StringBuilder sb = new StringBuilder();
             sb.append("MAPA/").append(x).append("/").append(y);
@@ -379,9 +383,6 @@ public class ClienteHandler implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            for (Utilizador u : this.users.values()) {
-                u.unlock();
-            }
             this.lock.unlock();
         }
     }
@@ -390,40 +391,42 @@ public class ClienteHandler implements Runnable{
      * Método auxiliar que indica quantas pessoas estiveram numa dada localização
      */
     public int usersNaPosicao(int x, int y) {
+        int r = 0;
         try {
-            int r = 0;
+            Collection<Utilizador> users = new ArrayList<>();
             this.lock.lock();
             for (Utilizador u : this.users.values()) {
+                users.add(u);
                 u.lock();
             }
-            for (Utilizador u : this.users.values()) {
+            this.lock.unlock();
+            for (Utilizador u : users) {
                 for (Posicao p : u.getContactos().keySet()) {
                     if (p.getPosX() == x && p.getPosY() == y) {
                         r++;
                         break;
                     }
                 }
-            }
-            return r;
-        } finally {
-            for (Utilizador u : this.users.values()) {
                 u.unlock();
             }
-            this.lock.unlock();
-        }
+        } catch (Exception ignored) {}
+        return r;
     }
 
     /**
      * Método auxiliar que indica quantas pessoas estiveram infetadas numa dada localização
      */
     public int userInfetadosPosicao(int x,int y) {
+        int r = 0;
         try {
-            int r = 0;
+            Collection<Utilizador> users = new ArrayList<>();
             this.lock.lock();
             for (Utilizador u : this.users.values()) {
+                users.add(u);
                 u.lock();
             }
-            for (Utilizador u : this.users.values()) {
+            this.lock.unlock();
+            for (Utilizador u : users) {
                 if(u.isInfetado()){
                     for (Posicao p : u.getContactos().keySet()) {
                         if (p.getPosX() == x && p.getPosY() == y) {
@@ -432,13 +435,9 @@ public class ClienteHandler implements Runnable{
                         }
                     }
                 }
-            }
-            return r;
-        } finally {
-            for (Utilizador u : this.users.values()) {
                 u.unlock();
             }
-            this.lock.unlock();
-        }
+        } catch (Exception ignored) {}
+        return r;
     }
 }

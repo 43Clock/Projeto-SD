@@ -162,7 +162,7 @@ public class Utilizador {
     }
 
     /**
-     * Método que para fazer o aviso de infeção
+     * Método para fazer o aviso de infeção
      */
     public void avisa() {
         try {

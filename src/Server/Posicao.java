@@ -1,5 +1,7 @@
 package Server;
 
+import java.util.Objects;
+
 public class Posicao {
     private int posX;
     private int posY;
@@ -16,6 +18,7 @@ public class Posicao {
     public int getPosX() {
         return posX;
     }
+
     /**
      * Getter da posY
      * @return

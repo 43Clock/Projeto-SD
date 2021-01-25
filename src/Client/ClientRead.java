@@ -51,7 +51,7 @@ public class ClientRead implements Runnable{
     }
 
     /**
-     * Método run que é executado pela Thread
+     * Método run que é executado pela Thread, para interpretar as mensaagens recebidas
      */
     @Override
     public void run() {
