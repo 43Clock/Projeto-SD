@@ -300,6 +300,9 @@ public class ClienteHandler implements Runnable{
         try {
             this.lock.lock();
             int x = 0, y = 0;
+            for (Utilizador u : this.users.values()) {
+                u.lock();
+            }
             for(Utilizador u:this.users.values()){ //Dimensao do mapa
                 for (Posicao p : u.getContactos().keySet()) {
                     x = Math.max(p.getPosX(),x);
@@ -319,6 +322,9 @@ public class ClienteHandler implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            for (Utilizador u : this.users.values()) {
+                u.unlock();
+            }
             this.lock.unlock();
         }
     }
