@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * Classe que é responsável por notificar um utilizador quando esteve em contacto com um infetado.
+ */
 public class CovidHandler implements Runnable {
     private DataOutputStream out;
     private Lock lock;
@@ -17,7 +20,9 @@ public class CovidHandler implements Runnable {
         this.condition = condition;
         this.utilizador = utilizador;
     }
-
+    /**
+     * Método run que é executado pela Thread.
+     */
     @Override
     public void run() {
         while (true) {
