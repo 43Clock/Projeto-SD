@@ -19,10 +19,6 @@ public class ClientRead implements Runnable{
         this.s = s;
     }
 
-    /**
-     * Método usado para imprimir o mapa de localizações
-     * @param msg String que contem o mapa e as suas dimensões
-     */
     public void mapa(String msg) {
         String[] args = msg.split("/");
         int x = Integer.parseInt(args[1]);
@@ -50,9 +46,6 @@ public class ClientRead implements Runnable{
         System.out.println(t.toString());
     }
 
-    /**
-     * Método run que é executado pela Thread
-     */
     @Override
     public void run() {
         try {
