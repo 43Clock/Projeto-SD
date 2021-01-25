@@ -26,6 +26,9 @@ public class ClienteHandler implements Runnable{
         this.conditionCovid = c2;
     }
 
+    /**
+     * Método run que é executado pela Thread
+     */
     @Override
     public void run() {
         try {
@@ -48,6 +51,12 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método que recebe uma mensagem do cliente e reencaminha para um método correto para ser precessado.
+     * @param msg Pedido recebido
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void comandos(String msg) throws IOException, InterruptedException {
         String[] args = msg.split("/");
 
@@ -83,6 +92,11 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsavel por fazer o logout de um utilizador.
+     * @param msg Pedido recebido
+     * @throws IOException
+     */
     public void comandoLogout(String msg) throws IOException {
         try {
             this.lock.lock();
@@ -95,6 +109,10 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsavel por fazer o registo de um novo utilizador
+     * @param msg Pedido recebido
+     */
     public void comandoRegistar(String msg) {
         String[] args = msg.split("/");
         Utilizador u = new Utilizador(args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
@@ -116,6 +134,10 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsável por alterar o historico do utilizidor com as pessoas que esteve em contacto com numa determinada posição
+     * @param p Posição para a qual o utilizador se moveu
+     */
     public void usersNaZona(Posicao p) {
         try {
             this.lock.lock();
@@ -143,6 +165,10 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsavel por fazer o login de um utilizador
+     * @param msg Pedido recebido
+     */
     public void comandoLogin(String msg)  {
         String[] args = msg.split("/");
         try {
@@ -183,6 +209,11 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsável por alterar a posição do utilizador, alterando o seu historico de contactos
+     * @param msg Pedido recebido
+     * @throws IOException
+     */
     public void comandoMover(String msg) throws IOException {
         String[] args = msg.split("/");
         Utilizador u;
@@ -213,6 +244,11 @@ public class ClienteHandler implements Runnable{
 
     }
 
+    /**
+     * Método utilizado para verificar se uma certa posição se encontra utilizadores
+     * @param posicao Posição a verificar
+     * @return True caso esta livre, False caso contrário
+     */
     public boolean posicaoLivre(Posicao posicao) {
         boolean res = true;
         try {
@@ -232,6 +268,12 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+
+    /**
+     * Método responsavel por informar o utilizador de quantas pessoas estão numa certa localização
+     * @param msg Pedido recebido
+     * @throws IOException
+     */
     public void comandoPessoasLocalizacao(String msg) throws IOException {
         String[] args = msg.split("/");
         int sum = 0;
@@ -253,6 +295,12 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+
+    /**
+     * Método responsavel por notificar um utilizador se uma dada posição está vazia.
+     * @param msg Pedido recebido
+     * @throws IOException
+     */
     public void comandoMoverVazio(String msg) {
         String[] args = msg.split("/");
         try {
@@ -275,6 +323,11 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsavel por notificar todos utilizadores que tiveram em contacto com um utilizador infétado
+     * @param msg Pedido recebido
+     * @throws IOException
+     */
     public void comandoInfecao(String msg) throws IOException {
         try {
             this.lock.lock();
@@ -296,6 +349,10 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método responsavel por comunicar a um utilizador especial o mapa de historicos de posições
+     * @param msg Pedido recebido
+     */
     public void comandoMapa(String msg) {
         try {
             this.lock.lock();
@@ -329,6 +386,9 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método auxiliar que indica quantas pessoas estiveram numa dada localização
+     */
     public int usersNaPosicao(int x, int y) {
         try {
             int r = 0;
@@ -353,6 +413,9 @@ public class ClienteHandler implements Runnable{
         }
     }
 
+    /**
+     * Método auxiliar que indica quantas pessoas estiveram infetadas numa dada localização
+     */
     public int userInfetadosPosicao(int x,int y) {
         try {
             int r = 0;

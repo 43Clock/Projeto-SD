@@ -1,7 +1,5 @@
 package Server;
 
-import java.util.Objects;
-
 public class Posicao {
     private int posX;
     private int posY;
@@ -11,20 +9,19 @@ public class Posicao {
         this.posY = posY;
     }
 
+    /**
+     * Getter da posX
+     * @return
+     */
     public int getPosX() {
         return posX;
     }
-
+    /**
+     * Getter da posY
+     * @return
+     */
     public int getPosY() {
         return posY;
-    }
-
-    public void setPosX(int posX) {
-        this.posX = posX;
-    }
-
-    public void setPosY(int posY) {
-        this.posY = posY;
     }
 
     @Override
